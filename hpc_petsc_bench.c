@@ -24,7 +24,7 @@ int main(int argc, char **argv){
 	/*Create the KSP context and setup*/
 	ierr = KSPCreate(PETSC_COMM_WORLD,&ksp);CHKERRQ(ierr);	
 	ierr = KSPSetType(ksp,KSPFGMRES);CHKERRQ(ierr);	
-	ierr = KSPSetOperators(ksp,A,A,DIFFERENT_NONZERO_PATTERN);CHKERRQ(ierr);	
+	ierr = KSPSetOperators(ksp,A,A);CHKERRQ(ierr);	
 	ierr = KSPSetFromOptions(ksp);CHKERRQ(ierr);	
 	ierr = KSPSetUp(ksp);CHKERRQ(ierr);	
 	PetscPrintf(PETSC_COMM_WORLD,"]> Krylov Solver settings done\n");
@@ -82,7 +82,7 @@ PetscErrorCode loadMatrix(Mat * A){
 	PetscInt sizex,sizey;
 
 	/*check args, if no matrix then no work... matrix file is mandatory*/
-	ierr=PetscOptionsGetString(PETSC_NULL,"-mfile",file,PETSC_MAX_PATH_LEN-1,&flag);CHKERRQ(ierr);
+	ierr=PetscOptionsGetString(NULL,PETSC_NULL,"-mfile",file,PETSC_MAX_PATH_LEN-1,&flag);CHKERRQ(ierr);
 	if (!flag) {		
 		sprintf(err,"Error : mfile is not properly set -> %s\n",file);
 		SETERRQ(PETSC_COMM_WORLD,(PetscErrorCode)83,err);
@@ -106,14 +106,13 @@ PetscErrorCode loadMatrix(Mat * A){
 
 PetscErrorCode loadVector(char * type_v,Vec * b){
 	char file[PETSC_MAX_PATH_LEN];
-	char err[PETSC_MAX_PATH_LEN];
 	PetscErrorCode ierr;
 	PetscBool flag;
 	PetscViewer fd;
 	PetscInt size;
 
 	// check if there is a vec file, vector is not mandatory
-	ierr=PetscOptionsGetString(PETSC_NULL,type_v,file,PETSC_MAX_PATH_LEN-1,&flag);CHKERRQ(ierr);
+	ierr=PetscOptionsGetString(NULL,PETSC_NULL,type_v,file,PETSC_MAX_PATH_LEN-1,&flag);CHKERRQ(ierr);
 	if (!flag) {		
 		PetscPrintf(PETSC_COMM_WORLD,"Error : %s is not properly set\n",type_v);
 		*b = NULL;
