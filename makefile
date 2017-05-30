@@ -8,7 +8,11 @@ CFLAGS = -O3
 
 ###Tuning Parameters###
 
+<<<<<<< HEAD
 MPI_NODES=1
+=======
+MPI_NODES=2
+>>>>>>> dec8987ed4eb7c503a1985fb0a337e2a43a1c2d7
 GMRES_RESTART=200
 KSP_MONITOR=-ksp_monitor_true_residual
 RTOL=1e-100
@@ -48,8 +52,16 @@ exec: hpc_petsc_bench.o
 
 runa:
 	-@${MPIEXEC} -np ${MPI_NODES} ./petscbench -ksp_gmres_restart ${GMRES_RESTART} ${KSP_MONITOR} -ksp_rtol ${RTOL} \
+<<<<<<< HEAD
 		-ksp_divtol ${DIVTOL} -ksp_max_it ${MAX_ITE} -pc_type ${PC} -ksp_atol ${ATOL} -mfile ${MAT} -log_view
 
 runb:
 	./petscbench -ksp_gmres_restart 200 ${KSP_MONITOR} -ksp_rtol 1e-100 -ksp_divtol 1e1000 -ksp_max_it 20000 -pc_type none -ksp_atol 1e-10 -mfile ./utm300.mtx_300x300_3155nnz -log_view
+=======
+		-ksp_divtol ${DIVTOL} -ksp_max_it ${MAX_ITE} -pc_type ${PC} -ksp_atol ${ATOL} -mfile ${MAT}
+
+#runb:
+#	./petscbench -ksp_gmres_restart 200 -ksp_monitor_true_residual -ksp_rtol 1e-100 -ksp_divtol 1e1000 -ksp_max_it 20000 -pc_type none -ksp_atol 1e-10\
+#        -mfile ./utm300.mtx_300x300_3155nnz
+>>>>>>> dec8987ed4eb7c503a1985fb0a337e2a43a1c2d7
 

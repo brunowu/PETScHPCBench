@@ -82,7 +82,11 @@ PetscErrorCode loadMatrix(Mat * A){
 	PetscInt sizex,sizey;
 
 	/*check args, if no matrix then no work... matrix file is mandatory*/
+<<<<<<< HEAD
 	ierr=PetscOptionsGetString(NULL,PETSC_NULL,"-mfile",file,PETSC_MAX_PATH_LEN-1,&flag);CHKERRQ(ierr);
+=======
+	ierr=PetscOptionsGetString(PETSC_NULL,"-mfile",file,PETSC_MAX_PATH_LEN-1,&flag);CHKERRQ(ierr);
+>>>>>>> dec8987ed4eb7c503a1985fb0a337e2a43a1c2d7
 	if (!flag) {		
 		sprintf(err,"Error : mfile is not properly set -> %s\n",file);
 		SETERRQ(PETSC_COMM_WORLD,(PetscErrorCode)83,err);
@@ -112,7 +116,11 @@ PetscErrorCode loadVector(char * type_v,Vec * b){
 	PetscInt size;
 
 	// check if there is a vec file, vector is not mandatory
+<<<<<<< HEAD
 	ierr=PetscOptionsGetString(NULL,PETSC_NULL,type_v,file,PETSC_MAX_PATH_LEN-1,&flag);CHKERRQ(ierr);
+=======
+	ierr=PetscOptionsGetString(PETSC_NULL,type_v,file,PETSC_MAX_PATH_LEN-1,&flag);CHKERRQ(ierr);
+>>>>>>> dec8987ed4eb7c503a1985fb0a337e2a43a1c2d7
 	if (!flag) {		
 		PetscPrintf(PETSC_COMM_WORLD,"Error : %s is not properly set\n",type_v);
 		*b = NULL;
