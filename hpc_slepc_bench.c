@@ -20,6 +20,7 @@ int main(int argc, char **argv){
 	ierr=loadInputs(&A,&x);CHKERRQ(ierr);
 	PetscPrintf(PETSC_COMM_WORLD,"]> Data loaded\n");
 
+<<<<<<< HEAD:hpc_slepc_bench.c
 	/*Create the EPS context and setup*/
 	ierr = EPSCreate(PETSC_COMM_WORLD,&eps);CHKERRQ(ierr);
 	ierr = EPSSetOperators(eps, A, NULL);CHKERRQ(ierr);
@@ -27,6 +28,14 @@ int main(int argc, char **argv){
 	ierr = EPSSetType(eps,EPSARNOLDI);CHKERRQ(ierr);
 	ierr = EPSSetFromOptions(eps);CHKERRQ(ierr);
 
+=======
+	/*Create the KSP context and setup*/
+	ierr = KSPCreate(PETSC_COMM_WORLD,&ksp);CHKERRQ(ierr);	
+	ierr = KSPSetType(ksp,KSPFGMRES);CHKERRQ(ierr);	
+	ierr = KSPSetOperators(ksp,A,A);CHKERRQ(ierr);	
+	ierr = KSPSetFromOptions(ksp);CHKERRQ(ierr);	
+	ierr = KSPSetUp(ksp);CHKERRQ(ierr);	
+>>>>>>> cc815758c054ca1f180502c9868253ac00ee0233:hpc_petsc_bench.c
 	PetscPrintf(PETSC_COMM_WORLD,"]> Krylov Solver settings done\n");
 
 	/*Solve the problem*/
@@ -85,7 +94,15 @@ PetscErrorCode loadMatrix(Mat * A){
 	PetscInt sizex,sizey;
 
 	/*check args, if no matrix then no work... matrix file is mandatory*/
+<<<<<<< HEAD:hpc_slepc_bench.c
 	ierr=PetscOptionsGetString(NULL,PETSC_NULL,"-mfile",file,PETSC_MAX_PATH_LEN-1,&flag);CHKERRQ(ierr);
+=======
+<<<<<<< HEAD
+	ierr=PetscOptionsGetString(NULL,PETSC_NULL,"-mfile",file,PETSC_MAX_PATH_LEN-1,&flag);CHKERRQ(ierr);
+=======
+	ierr=PetscOptionsGetString(PETSC_NULL,"-mfile",file,PETSC_MAX_PATH_LEN-1,&flag);CHKERRQ(ierr);
+>>>>>>> dec8987ed4eb7c503a1985fb0a337e2a43a1c2d7
+>>>>>>> cc815758c054ca1f180502c9868253ac00ee0233:hpc_petsc_bench.c
 	if (!flag) {		
 		sprintf(err,"Error : mfile is not properly set -> %s\n",file);
 		SETERRQ(PETSC_COMM_WORLD,(PetscErrorCode)83,err);
@@ -115,7 +132,15 @@ PetscErrorCode loadVector(char * type_v,Vec * b){
 	PetscInt size;
 
 	// check if there is a vec file, vector is not mandatory
+<<<<<<< HEAD:hpc_slepc_bench.c
 	ierr=PetscOptionsGetString(NULL,PETSC_NULL,type_v,file,PETSC_MAX_PATH_LEN-1,&flag);CHKERRQ(ierr);
+=======
+<<<<<<< HEAD
+	ierr=PetscOptionsGetString(NULL,PETSC_NULL,type_v,file,PETSC_MAX_PATH_LEN-1,&flag);CHKERRQ(ierr);
+=======
+	ierr=PetscOptionsGetString(PETSC_NULL,type_v,file,PETSC_MAX_PATH_LEN-1,&flag);CHKERRQ(ierr);
+>>>>>>> dec8987ed4eb7c503a1985fb0a337e2a43a1c2d7
+>>>>>>> cc815758c054ca1f180502c9868253ac00ee0233:hpc_petsc_bench.c
 	if (!flag) {		
 		PetscPrintf(PETSC_COMM_WORLD,"Error : %s is not properly set\n",type_v);
 		*b = NULL;

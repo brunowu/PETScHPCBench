@@ -8,10 +8,6 @@
 #SBATCH --time=02:30:00
 
 #SBATCH -n 4
-<<<<<<< HEAD
-#SBATCH -N 1
-=======
->>>>>>> cc815758c054ca1f180502c9868253ac00ee0233
 #SBATCH --gres=gpu:2
 
 
