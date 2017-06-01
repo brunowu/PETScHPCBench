@@ -1,70 +1,73 @@
-#include "hpc_petsc_bench.h"
+#include "hpc_slepc_bench.h"
 
 
-static const char help[] = "Solve Ax=b using GMRES, options array_in_received_buffer\n\
+static const char help[] = "Solve Non-Hermitian eigenvalues problem by Arnoldi, options array_in_received_buffer\n\
 \t-mfile matrix_file (matrix file in PETSc bin format, this is mandatory)\n\
-\t-bfile right_and_side_file (also in PETSc bin format)\n\
-\t-xfile initial_solution_file (in PETSc bin format)\n";
-
-
+\t-xfile initial_guess_file (in PETSc bin format)\n";
 
 int main(int argc, char **argv){
 	PetscErrorCode ierr;
-	Vec x,b;
+	Vec x;
 	Mat A;
-	KSP ksp;
+	EPS eps;
+	PetscInt its, nev, nconv;
+	EPSType type;
 
-	ierr=PetscInitialize(&argc,&argv,PETSC_NULL,PETSC_NULL);CHKERRQ(ierr);
-	PetscPrintf(PETSC_COMM_WORLD,"]> Initializing PETSc/SLEPc\n");
+	ierr=SlepcInitialize(&argc,&argv,PETSC_NULL,help);CHKERRQ(ierr);
+	PetscPrintf(PETSC_COMM_WORLD,"\n\n]> Initializing SLEPc\n");
 	
 	/*Load data*/
-	ierr=loadInputs(&A,&b,&x);CHKERRQ(ierr);
+	ierr=loadInputs(&A,&x);CHKERRQ(ierr);
 	PetscPrintf(PETSC_COMM_WORLD,"]> Data loaded\n");
 
-	/*Create the KSP context and setup*/
-	ierr = KSPCreate(PETSC_COMM_WORLD,&ksp);CHKERRQ(ierr);	
-	ierr = KSPSetType(ksp,KSPFGMRES);CHKERRQ(ierr);	
-	ierr = KSPSetOperators(ksp,A,A,DIFFERENT_NONZERO_PATTERN);CHKERRQ(ierr);	
-	ierr = KSPSetFromOptions(ksp);CHKERRQ(ierr);	
-	ierr = KSPSetUp(ksp);CHKERRQ(ierr);	
+	/*Create the EPS context and setup*/
+	ierr = EPSCreate(PETSC_COMM_WORLD,&eps);CHKERRQ(ierr);
+	ierr = EPSSetOperators(eps, A, NULL);CHKERRQ(ierr);
+	ierr = EPSSetProblemType(eps, EPS_NHEP);CHKERRQ(ierr);
+	ierr = EPSSetType(eps,EPSARNOLDI);CHKERRQ(ierr);
+	ierr = EPSSetFromOptions(eps);CHKERRQ(ierr);
+
 	PetscPrintf(PETSC_COMM_WORLD,"]> Krylov Solver settings done\n");
 
-	/*Solve the system*/
+	/*Solve the problem*/
 	PetscPrintf(PETSC_COMM_WORLD,"]> Krylov Solver Launching solving process\n");
-	ierr = KSPSolve(ksp, b, x); CHKERRQ(ierr);
+	ierr = EPSSolve(eps);CHKERRQ(ierr);
 	PetscPrintf(PETSC_COMM_WORLD,"]> Krylov Solver System solved\n");
 
+	/*Get some informations of resolution*/
+
+	ierr = EPSGetIterationNumber(eps,&its);CHKERRQ(ierr);
+	PetscPrintf(PETSC_COMM_WORLD," Number of iterations of the method: %D\n",its);
+	ierr = EPSGetType(eps,&type);CHKERRQ(ierr);
+	PetscPrintf(PETSC_COMM_WORLD," Solution method: %s\n\n",type);
+	ierr = EPSGetDimensions(eps,&nev,NULL,NULL);CHKERRQ(ierr);
+	PetscPrintf(PETSC_COMM_WORLD," Number of requested eigenvalues: %D\n",nev);
+	/*Display the solution*/
+	EPSGetConverged(eps,&nconv);
+	PetscPrintf(PETSC_COMM_WORLD," Number of converged eigenpairs: %D\n\n",nconv);
 	/*Clean*/
-	ierr = KSPDestroy(&ksp);CHKERRQ(ierr);
-	ierr = VecDestroy(&b);CHKERRQ(ierr);
+	ierr = EPSDestroy(&eps);CHKERRQ(ierr);
 	ierr = VecDestroy(&x);CHKERRQ(ierr);
 	ierr = MatDestroy(&A);CHKERRQ(ierr);
 	PetscPrintf(PETSC_COMM_WORLD,"]> Cleaned structures, finalizing\n");
 
-	/*Finalize PETSc*/
-	PetscFinalize(); 
+	/*Finalize SLEPc*/
+	SlepcFinalize(); 
 
 	return 0;
 }
 
 
-PetscErrorCode loadInputs(Mat * A, Vec * b, Vec * x){
+PetscErrorCode loadInputs(Mat * A, Vec * x){
 	PetscErrorCode ierr;
 	PetscInt sizex,sizey;
-	char bfile[]="-bfile";
 	char xfile[]="-xfile";
 	
 	//load data files
 	ierr=loadMatrix(A);CHKERRQ(ierr);
-	ierr=loadVector(bfile,b);CHKERRQ(ierr);
-	if(*b==NULL) {
-		PetscPrintf(PETSC_COMM_WORLD,"]> Creating vector b\n");
-		ierr=MatGetSize(*A,&sizex,&sizey);CHKERRQ(ierr);
-		ierr=generateVectorRandom(sizex,b);CHKERRQ(ierr);
-	}
 	ierr=loadVector(xfile,x);CHKERRQ(ierr);
 	if(*x==NULL) {
-		PetscPrintf(PETSC_COMM_WORLD,"]> Creating vector x\n");
+		PetscPrintf(PETSC_COMM_WORLD,"]> Creating initial guessed vector x\n");
 		ierr=MatGetSize(*A,&sizex,&sizey);CHKERRQ(ierr);
 		ierr=generateVectorRandom(sizex,x);CHKERRQ(ierr);
 	}
@@ -82,7 +85,7 @@ PetscErrorCode loadMatrix(Mat * A){
 	PetscInt sizex,sizey;
 
 	/*check args, if no matrix then no work... matrix file is mandatory*/
-	ierr=PetscOptionsGetString(PETSC_NULL,"-mfile",file,PETSC_MAX_PATH_LEN-1,&flag);CHKERRQ(ierr);
+	ierr=PetscOptionsGetString(NULL,PETSC_NULL,"-mfile",file,PETSC_MAX_PATH_LEN-1,&flag);CHKERRQ(ierr);
 	if (!flag) {		
 		sprintf(err,"Error : mfile is not properly set -> %s\n",file);
 		SETERRQ(PETSC_COMM_WORLD,(PetscErrorCode)83,err);
@@ -106,14 +109,13 @@ PetscErrorCode loadMatrix(Mat * A){
 
 PetscErrorCode loadVector(char * type_v,Vec * b){
 	char file[PETSC_MAX_PATH_LEN];
-	char err[PETSC_MAX_PATH_LEN];
 	PetscErrorCode ierr;
 	PetscBool flag;
 	PetscViewer fd;
 	PetscInt size;
 
 	// check if there is a vec file, vector is not mandatory
-	ierr=PetscOptionsGetString(PETSC_NULL,type_v,file,PETSC_MAX_PATH_LEN-1,&flag);CHKERRQ(ierr);
+	ierr=PetscOptionsGetString(NULL,PETSC_NULL,type_v,file,PETSC_MAX_PATH_LEN-1,&flag);CHKERRQ(ierr);
 	if (!flag) {		
 		PetscPrintf(PETSC_COMM_WORLD,"Error : %s is not properly set\n",type_v);
 		*b = NULL;
