@@ -1,0 +1,3 @@
+/Users/xwu/phd_xwu/PETScHPCBench/CMakeFiles/edit_cache.dir
+/Users/xwu/phd_xwu/PETScHPCBench/CMakeFiles/rebuild_cache.dir
+/Users/xwu/phd_xwu/PETScHPCBench/CMakeFiles/petscbench.exe.dir
