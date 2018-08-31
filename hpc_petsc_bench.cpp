@@ -1,4 +1,4 @@
-#include "hpc_petsc_bench.h"
+#include "hpc_petsc_bench.hpp"
 
 
 static const char help[] = "Solve Ax=b using GMRES, options array_in_received_buffer\n\

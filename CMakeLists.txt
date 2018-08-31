@@ -12,7 +12,7 @@ endif()
 
 message ([STATUS] "PETSC COMPILER is found as ${PETSC_COMPILER}")
 
-#add_definitions (-std=c++0x)
+add_definitions (-std=c++0x)
 
 message ([STATUS] "CPP COMPILER ${PETSC_COMPILER}")
 
@@ -28,7 +28,7 @@ message (STATUS "PETSC_LIBRARIES ${PETSC_LIBRARIES}")
 
 set (PETScBenchmark_DEPENDENT_LIBRARIES "${PETSC_LIBRARIES}")
 
-add_executable(petscbench.exe hpc_petsc_bench.c)
+add_executable(petscbench.exe hpc_petsc_bench.cpp)
 
 target_link_libraries(petscbench.exe ${PETSC_LIBRARIES})
 
